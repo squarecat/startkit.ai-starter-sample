@@ -1,1 +1,105 @@
+spec:
+  name: startkit-ai-sample
+  region: nyc
+  alerts:
+    - rule: DEPLOYMENT_FAILED
+    - rule: DOMAIN_FAILED
 
+  features:
+    - 'buildpack-stack=ubuntu-22'
+
+  ingress:
+    rules:
+      - component:
+          name: api
+        match:
+          path:
+            prefix: /
+      - component:
+          name: memory
+        match:
+          path:
+            prefix: /memory
+  envs:
+    - key: OPENAI_KEY
+      value: ''
+    - key: OPENAI_ORG_ID
+      value: ''
+    - key: MONGO_URI
+      value: ''
+    - key: JWT_SECRET
+      value: ''      
+    - key: STRIPE_WEBHOOK_SECRET
+      value: '' 
+    - key: STRIPE_API_KEY
+      value: ''      
+    - key: RESEND_SENDING_ADDRESS
+      value: ''
+    - key: RESEND_API_KEY
+      value: ''      
+    - key: RESEND_AUDIENCE_ID
+      value: ''
+    - key: STORAGE_URL
+      value: 'https://sfo3.digitaloceanspaces.com'
+    - key: STORAGE_REGION
+      value: 'sfo3'
+    - key: STORAGE_NAME
+      value: 'startkit'
+    - key: STORAGE_KEY
+      value: ''      
+    - key: STORAGE_SECRET
+      value: ''
+    - key: PINECONE_API_KEY
+      value: ''
+    - key: PINECONE_INDEX_HOST
+      value: ''
+  
+  services:
+    - name: api
+      github:
+        branch: main
+        repo: startkit-ai/startkit.ai
+      dockerfile_path: Dockerfile
+      http_port: 8080
+      instance_count: 1
+      instance_size_slug: professional-xs
+      run_command: node server/index.js
+      source_dir: /
+      envs:
+        - key: NODE_ENV
+          value: 'production'
+        - key: EMBEDDINGS_URL
+          value: ${memory.PRIVATE_URL}
+        - key: EMBEDDINGS_BEARER_TOKEN
+          value: ${APP_ID}
+          type: SECRET
+        - key: VITE_API_URL
+          value: ${_self.PUBLIC_URL}        
+        - key: API_HOST
+          value: 0.0.0.0
+        - key: API_PORT
+          value: '8080'
+        - key: MAGIC_LINK_REDIRECT
+          value: ${_self.PUBLIC_URL}
+    - name: memory
+      dockerfile_path: Dockerfile
+      github:
+        branch: main
+        repo: squarecat/chatgpt-retrieval-plugin
+      http_port: 8080
+      instance_count: 1
+      instance_size_slug: professional-xs
+      source_dir: /
+      envs:
+        - key: DATASTORE
+          value: pinecone
+        - key: EMBEDDING_DIMENSION
+          value: '1536'
+        - key: EMBEDDING_MODEL
+          value: text-embedding-3-small
+        - key: BEARER_TOKEN
+          value: ${APP_ID}
+          type: SECRET       
+        - key: OPENAI_API_KEY
+          value: ${OPENAI_KEY}
+          type: SECRET
