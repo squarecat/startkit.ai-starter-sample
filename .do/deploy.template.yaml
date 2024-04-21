@@ -28,11 +28,7 @@ spec:
     - key: MONGO_URI
       value: ''
     - key: JWT_SECRET
-      value: ''      
-    - key: STRIPE_WEBHOOK_SECRET
-      value: '' 
-    - key: STRIPE_API_KEY
-      value: ''      
+      value: ''          
     - key: RESEND_SENDING_ADDRESS
       value: ''
     - key: RESEND_API_KEY
@@ -58,7 +54,7 @@ spec:
     - name: api
       github:
         branch: main
-        repo: startkit-ai/startkit.ai
+        repo: startkit-ai/startkit.ai-starter
       dockerfile_path: Dockerfile
       http_port: 8080
       instance_count: 1
